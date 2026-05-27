@@ -93,9 +93,13 @@ def main():
     print(" 시각(UTC):", datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
     print("=" * 58)
 
-    filter_url = os.getenv("FILTER_URL", "").strip()
-    token = os.getenv("TELEGRAM_TOKEN", "").strip()
-    chat_id = os.getenv("TELEGRAM_CHATID", "").strip()
+    # BOM/whitespace 방어 (PowerShell에서 secret 등록 시 BOM이 끼는 경우 대비)
+    def _clean(s):
+        return (s or "").lstrip("﻿").strip()
+
+    filter_url = _clean(os.getenv("FILTER_URL", ""))
+    token = _clean(os.getenv("TELEGRAM_TOKEN", ""))
+    chat_id = _clean(os.getenv("TELEGRAM_CHATID", ""))
 
     if not filter_url:
         print(" FILTER_URL 시크릿이 비어 있습니다."); sys.exit(1)
