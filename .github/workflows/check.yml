@@ -1,0 +1,50 @@
+name: Wishket Monitor
+
+on:
+  schedule:
+    # 매시간 정시 (UTC 기준). GitHub Actions cron은 5~15분 지연이 흔함.
+    - cron: "0 * * * *"
+  workflow_dispatch:  # 수동 실행도 가능
+
+permissions:
+  contents: write  # seen.json 자동 커밋용
+
+concurrency:
+  group: wishket-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monitor
+        env:
+          FILTER_URL: ${{ secrets.FILTER_URL }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHATID: ${{ secrets.TELEGRAM_CHATID }}
+        run: python monitor.py
+
+      - name: Commit seen.json if changed
+        run: |
+          if [[ -n "$(git status --porcelain seen.json)" ]]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add seen.json
+            git commit -m "update seen.json [skip ci]"
+            git push
+          else
+            echo "no changes to seen.json"
+          fi
