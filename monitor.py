@@ -90,7 +90,7 @@ def save_seen(seen):
 def main():
     print("=" * 58)
     print(" 위시켓 프로젝트 알리미 (GitHub Actions)")
-    print(" 시각(UTC):", datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+    print(" 시각(UTC):", datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))
     print("=" * 58)
 
     # BOM/whitespace 방어 (PowerShell에서 secret 등록 시 BOM이 끼는 경우 대비)
@@ -114,7 +114,7 @@ def main():
 
     seen = load_seen()
     first_run = len(seen) == 0
-    now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
     new_open = []
     for p in projects:
